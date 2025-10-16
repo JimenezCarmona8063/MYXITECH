@@ -1,15 +1,355 @@
 <!DOCTYPE html>
-<!--
-Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit this template
--->
-<html>
+<html lang="es">
 <head>
-    <title>Hola Mundo</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Pixel Art - Fundadores</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        :root {
+            color-scheme: light dark;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 1.5rem;
+            padding: 2rem 1rem 4rem;
+            background: linear-gradient(180deg, #0b1d3b 0%, #173f6b 40%, #265f91 100%);
+            font-family: 'Press Start 2P', monospace;
+            color: #f5f5f5;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: clamp(1.2rem, 2vw + 0.5rem, 2.2rem);
+            letter-spacing: 0.15em;
+            text-shadow: 4px 4px 0 rgba(0, 0, 0, 0.6);
+            margin: 0;
+        }
+
+        p.description {
+            max-width: 720px;
+            margin: 0;
+            line-height: 1.6;
+            font-size: clamp(0.65rem, 1.2vw, 0.9rem);
+            text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.45);
+        }
+
+        canvas {
+            width: min(90vw, 640px);
+            height: auto;
+            image-rendering: pixelated;
+            border: 8px solid #1b1b1b;
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+            background: #1e1e1e;
+            border-radius: 18px;
+        }
+
+        .panel {
+            max-width: 760px;
+            width: min(92vw, 760px);
+            padding: 1.2rem 1.6rem;
+            border-radius: 18px;
+            background: rgba(15, 25, 46, 0.75);
+            border: 4px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 16px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .panel h2 {
+            font-size: clamp(0.9rem, 1.5vw + 0.4rem, 1.3rem);
+            margin-bottom: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+        }
+
+        .legend-list {
+            display: grid;
+            gap: 0.7rem;
+            justify-items: start;
+            text-align: left;
+            font-size: clamp(0.6rem, 1vw + 0.35rem, 0.85rem);
+            line-height: 1.5;
+            padding: 0;
+            list-style: none;
+            margin: 0;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+        }
+
+        .chip {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            border: 3px solid rgba(0, 0, 0, 0.5);
+            image-rendering: pixelated;
+            box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.22);
+        }
+
+        footer {
+            font-size: clamp(0.55rem, 0.8vw + 0.25rem, 0.75rem);
+            color: rgba(255, 255, 255, 0.7);
+            text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
+        }
+
+        a {
+            color: #f8e46c;
+        }
+    </style>
 </head>
 <body>
-    <h1>Hola Mundo</h1>
-    <p>¡Bienvenido al mundo del desarrollo web!</p>
+    <main>
+        <h1>Fundadores en Pixel Art</h1>
+        <p class="description">Un recorrido inspirado en el mapa del campus: el alumno entra por la puerta principal, cruza la explanada y se integra a los salones del Edificio Fundadores (C), acompañado de otros personajes y detalles en 2D.</p>
+        <canvas id="mapCanvas" aria-label="Mapa pixel art del edificio Fundadores"></canvas>
+    </main>
+
+    <section class="panel" aria-labelledby="leyenda-title">
+        <h2 id="leyenda-title">Leyenda rápida</h2>
+        <ul class="legend-list">
+            <li class="legend-item"><span class="chip" style="background:#c9b28a"></span>Edificio Fundadores (Bloque C)</li>
+            <li class="legend-item"><span class="chip" style="background:#d7cfa2"></span>Plaza y caminos peatonales</li>
+            <li class="legend-item"><span class="chip" style="background:#4b525a"></span>Vialidades y acceso vehicular</li>
+            <li class="legend-item"><span class="chip" style="background:#6bb757"></span>Zonas verdes con árboles y jardineras</li>
+            <li class="legend-item"><span class="chip" style="background:#ffce5c"></span>Alumno protagonista entrando a clases</li>
+        </ul>
+    </section>
+
+    <footer>Visualización conceptual creada en pixel art para orientar a estudiantes rumbo a Fundadores.</footer>
+
+    <script>
+        const canvas = document.getElementById('mapCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const scale = 8;
+        const mapSize = { width: 80, height: 50 };
+        canvas.width = mapSize.width * scale;
+        canvas.height = mapSize.height * scale;
+        ctx.imageSmoothingEnabled = false;
+
+        function fillRect(x, y, w, h, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(x * scale, y * scale, w * scale, h * scale);
+        }
+
+        function drawPixel(x, y, color) {
+            fillRect(x, y, 1, 1, color);
+        }
+
+        function drawPatternRect(x, y, w, h, baseColor, accentColor) {
+            fillRect(x, y, w, h, baseColor);
+            for (let i = 0; i < w; i++) {
+                for (let j = 0; j < h; j++) {
+                    if ((i + j) % 7 === 0) {
+                        drawPixel(x + i, y + j, accentColor);
+                    }
+                }
+            }
+        }
+
+        function drawGround() {
+            fillRect(0, 0, mapSize.width, mapSize.height, '#6bb757');
+            drawPatternRect(0, 38, 80, 6, '#4b525a', '#3a4147');
+            drawPatternRect(34, 14, 12, 34, '#d7cfa2', '#e4deba');
+            drawPatternRect(20, 28, 40, 8, '#d7cfa2', '#cfc594');
+            drawPatternRect(14, 32, 52, 4, '#b19e75', '#cbb98c');
+            drawPatternRect(34, 42, 12, 6, '#d7cfa2', '#f0e6bb');
+            drawPatternRect(56, 20, 10, 18, '#d7cfa2', '#c2b27a');
+
+            const planterPositions = [
+                { x: 18, y: 24 }, { x: 22, y: 24 }, { x: 26, y: 24 },
+                { x: 48, y: 26 }, { x: 52, y: 26 }, { x: 56, y: 26 }
+            ];
+            planterPositions.forEach(({ x, y }) => {
+                drawPatternRect(x, y, 4, 3, '#3f7d39', '#4b9645');
+                drawPixel(x + 1, y + 1, '#6ad35d');
+            });
+        }
+
+        function drawBuilding() {
+            drawPatternRect(22, 6, 36, 20, '#c9b28a', '#dbc9a6');
+            fillRect(22, 6, 36, 2, '#bca078');
+            fillRect(22, 8, 36, 1, '#f1e3c8');
+            fillRect(23, 7, 34, 1, '#a98c63');
+
+            for (let row = 0; row < 2; row++) {
+                for (let col = 0; col < 5; col++) {
+                    const x = 26 + col * 6;
+                    const y = 10 + row * 6;
+                    drawPatternRect(x, y, 4, 4, '#405a7c', '#54769e');
+                    fillRect(x, y, 4, 1, '#2f3f59');
+                }
+            }
+
+            drawPatternRect(34, 23, 12, 4, '#bca078', '#d5bc8c');
+            drawPatternRect(38, 24, 4, 3, '#3a2d1f', '#2a1f17');
+            fillRect(38, 24, 4, 1, '#1f1611');
+            drawPatternRect(37, 23, 6, 1, '#4d3b2a', '#2f2015');
+
+            ctx.fillStyle = '#2e2e2e';
+            ctx.font = `${4 * scale}px 'Press Start 2P', monospace`;
+            ctx.textBaseline = 'top';
+            ctx.fillText('C', 26 * scale, 8 * scale);
+            ctx.font = `${2.5 * scale}px 'Press Start 2P', monospace`;
+            ctx.fillText('Fundadores', 24 * scale, 4 * scale);
+        }
+
+        function drawTrees() {
+            const trunks = [
+                { x: 12, y: 20 }, { x: 16, y: 18 }, { x: 64, y: 16 },
+                { x: 68, y: 24 }, { x: 10, y: 34 }, { x: 60, y: 34 }
+            ];
+            trunks.forEach(({ x, y }) => {
+                drawPatternRect(x, y, 2, 4, '#4f3b24', '#412f1a');
+                drawPatternRect(x - 2, y - 4, 6, 5, '#1f5423', '#2d6c31');
+                drawPixel(x, y - 3, '#3d8e44');
+            });
+        }
+
+        function drawLightposts() {
+            const posts = [
+                { x: 30, y: 32 }, { x: 44, y: 32 }, { x: 34, y: 40 }, { x: 42, y: 40 }
+            ];
+            posts.forEach(({ x, y }) => {
+                drawPatternRect(x, y, 1, 5, '#343434', '#272727');
+                drawPatternRect(x - 1, y - 2, 3, 2, '#f6f0c0', '#fff4ab');
+                drawPixel(x, y - 2, '#fffcde');
+            });
+        }
+
+        const characters = [
+            { x: 30, y: 36, palette: ['#f7d7b5', '#2c68b3', '#1a4172'] },
+            { x: 48, y: 30, palette: ['#f4cda5', '#8a3d7e', '#5c2654'] },
+            { x: 24, y: 34, palette: ['#fbd2b2', '#f4a261', '#b4571a'] },
+            { x: 54, y: 36, palette: ['#d6a67f', '#377f62', '#1f4f3d'] }
+        ];
+
+        function drawCharacter(character) {
+            const { x, y, palette } = character;
+            drawPixel(x + 1, y - 3, palette[0]);
+            drawPixel(x, y - 2, palette[1]);
+            drawPixel(x + 1, y - 2, palette[1]);
+            drawPixel(x + 2, y - 2, palette[1]);
+            drawPixel(x, y - 1, palette[1]);
+            drawPixel(x + 1, y - 1, palette[2]);
+            drawPixel(x + 2, y - 1, palette[1]);
+            drawPixel(x, y, '#2b2b2b');
+            drawPixel(x + 2, y, '#2b2b2b');
+        }
+
+        const studentPath = [
+            { x: 40, y: 46 },
+            { x: 40, y: 40 },
+            { x: 40, y: 34 },
+            { x: 40, y: 28 },
+            { x: 40, y: 26 },
+            { x: 39, y: 24.5 },
+            { x: 39, y: 23 }
+        ];
+
+        const mainStudent = {
+            position: { ...studentPath[0] },
+            pathIndex: 0,
+            progress: 0,
+            inside: false
+        };
+
+        function lerp(a, b, t) {
+            return a + (b - a) * t;
+        }
+
+        let lastTimestamp = 0;
+
+        function update(delta) {
+            if (mainStudent.inside) {
+                return;
+            }
+
+            const speed = 0.45;
+            mainStudent.progress += speed * delta;
+
+            const current = studentPath[mainStudent.pathIndex];
+            const target = studentPath[mainStudent.pathIndex + 1];
+
+            if (!target) {
+                mainStudent.inside = true;
+                return;
+            }
+
+            const t = Math.min(mainStudent.progress, 1);
+            mainStudent.position.x = lerp(current.x, target.x, t);
+            mainStudent.position.y = lerp(current.y, target.y, t);
+
+            if (mainStudent.progress >= 1) {
+                mainStudent.pathIndex++;
+                mainStudent.progress = 0;
+                if (mainStudent.pathIndex >= studentPath.length - 1) {
+                    mainStudent.inside = true;
+                }
+            }
+        }
+
+        function drawStudent() {
+            const palette = ['#ffce5c', '#e0862d', '#b65a19'];
+            const { x, y } = mainStudent.position;
+            drawPixel(Math.round(x) + 1, Math.round(y) - 4, '#f8deb5');
+            drawPixel(Math.round(x), Math.round(y) - 3, palette[0]);
+            drawPixel(Math.round(x) + 1, Math.round(y) - 3, palette[1]);
+            drawPixel(Math.round(x) + 2, Math.round(y) - 3, palette[0]);
+            drawPixel(Math.round(x), Math.round(y) - 2, palette[1]);
+            drawPixel(Math.round(x) + 1, Math.round(y) - 2, palette[2]);
+            drawPixel(Math.round(x) + 2, Math.round(y) - 2, palette[1]);
+            drawPixel(Math.round(x), Math.round(y) - 1, '#2f2f2f');
+            drawPixel(Math.round(x) + 2, Math.round(y) - 1, '#2f2f2f');
+        }
+
+        function drawDoorGlow() {
+            const doorX = 38;
+            const doorY = 24;
+            const glowColors = ['#f6f1c7', '#e9d98b', '#d2b46c'];
+            glowColors.forEach((color, index) => {
+                ctx.globalAlpha = 0.2 + index * 0.15;
+                fillRect(doorX - index, doorY - 1 - index, 4 + index * 2, 4 + index * 2, color);
+            });
+            ctx.globalAlpha = 1;
+        }
+
+        function drawHUD() {
+            ctx.fillStyle = 'rgba(16, 29, 59, 0.6)';
+            fillRect(4, 2, 26, 7, 'rgba(16, 29, 59, 0.6)');
+            ctx.fillStyle = '#f8e46c';
+            ctx.font = `${2.1 * scale}px 'Press Start 2P', monospace`;
+            ctx.fillText('ACCESO', 6 * scale, 4.4 * scale);
+        }
+
+        function render(timestamp) {
+            const delta = (timestamp - lastTimestamp) / 1000;
+            lastTimestamp = timestamp;
+
+            drawGround();
+            drawBuilding();
+            drawTrees();
+            drawLightposts();
+            drawDoorGlow();
+
+            characters.forEach(drawCharacter);
+            drawStudent();
+            drawHUD();
+
+            update(delta);
+            requestAnimationFrame(render);
+        }
+
+        requestAnimationFrame(render);
+    </script>
 </body>
 </html>
-
